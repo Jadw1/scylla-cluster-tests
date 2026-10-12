@@ -995,6 +995,13 @@ class ScyllaLogCollector(LogCollector):
             command=f"cat {SCYLLA_YAML_PATH}",
         ),
         CommandLog(name="coredumps.info", command="sudo coredumpctl info"),
+        # SCYLLADB-4978: the schema commitlog, recycled segments included. Replayed
+        # segments are renamed to Recycled-SchemaLog-* and keep their content until
+        # reused, so this still holds what a failed restart replayed.
+        CommandLog(
+            name="schema-commitlog.tar.zst",
+            command="sudo tar --zstd --warning=no-file-changed -cf - -C /var/lib/scylla/commitlog schema 2>/dev/null",
+        ),
         CommandLog(name="io-properties.yaml", command="cat /etc/scylla.d/io_properties.yaml"),
         CommandLog(name="dmesg.log", command="sudo dmesg -P"),
         # a node which is up locally but unreachable for its peers and loaders (SCT-479) can
